@@ -13,5 +13,5 @@ dist/
 # Never committed. This repo is public.
 private/
 
-# Fixtures derived from real payloads never enter this repo
+# Local-only fixtures
 **/real-shape/

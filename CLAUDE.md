@@ -23,14 +23,18 @@ This repo is public. Before anything is committed:
 ## How work happens here
 
 1. One slice per session, picked from the plan.
-2. **Superpowers** runs the slice: writing-plans → subagent-driven-development with TDD →
-   verification-before-completion → finishing-a-development-branch.
-3. **Matt Pocock skills** when needed: `/grill-with-docs` when a slice adds domain terms (keeps
-   `docs/CONTEXT.md` and ADRs current), `/diagnosing-bugs` when stuck,
-   `/improve-codebase-architecture` weekly, `/handoff` at session end.
-4. **oh-my-claudecode** (enabled in this repo only): `/autopilot` or `ralph` only on a slice with
+2. **Superpowers** runs the slice: brainstorming (the signed-off design is the gate) →
+   writing-plans → subagent-driven-development with test-driven-development →
+   verification-before-completion → finishing-a-development-branch. systematic-debugging when
+   stuck, requesting-code-review before merge.
+3. **Matt Pocock skills** when needed: `grilling` to stress-test a technical design,
+   `domain-modeling` when a slice adds domain terms (keeps `docs/CONTEXT.md` and ADRs current),
+   `codebase-design` weekly for module and seam cleanup.
+4. **Session end:** append a short handoff note to `docs/HANDOFF.md` (what shipped, what's next,
+   open questions).
+5. **oh-my-claudecode** (enabled in this repo only): `/autopilot` or `ralph` only on a slice with
    a finished spec and tests to aim at.
-5. Every slice ships a visible result (clip, GIF or screenshot of synthetic data) and a line in
+6. Every slice ships a visible result (clip, GIF or screenshot of synthetic data) and a line in
    the changelog.
 
 ## Stack (to confirm in the first ADR)
