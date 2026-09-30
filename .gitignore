@@ -1,0 +1,17 @@
+# deps / build
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.env
+.env.*
+
+# local Claude Code settings
+.claude/settings.local.json
+
+# Private: prompts, pack files, validator internals, trap corpus, private context.
+# Never committed. This repo is public.
+private/
+
+# Fixtures derived from real payloads never enter this repo
+**/real-shape/
