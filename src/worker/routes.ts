@@ -1,7 +1,7 @@
 import { redactTranscript } from '../core/redact.ts';
 import { assertRedacted, UnredactedTranscriptError } from '../core/guard.ts';
 import { MIN_TRANSCRIPT_WORDS } from '../core/config.ts';
-import { insertCall, getCallView, decideProposal, markProcessing, type RejectReason } from './db.ts';
+import { insertCall, getCallView, decideProposal, markProcessing, markFailed, type RejectReason } from './db.ts';
 import { SAMPLES } from './samples.ts';
 
 const REJECT_REASONS: readonly RejectReason[] = ['wrong_value', 'wrong_person', 'not_agreed', 'other'];
@@ -46,7 +46,12 @@ export async function handle(req: Request, env: Env): Promise<Response> {
     }
     const id = crypto.randomUUID();
     await insertCall(env.DB, { id, callDate: b.callDate, redactedTranscript: redacted });
-    await env.PROCESS_CALL.create({ id, params: { callId: id } });
+    try {
+      await env.PROCESS_CALL.create({ id, params: { callId: id } });
+    } catch {
+      await markFailed(env.DB, id, 'could not start processing');
+      return json({ error: 'Could not start processing. Retry from the call page.', id }, 503);
+    }
     return json({ id }, 202);
   }
 
@@ -62,7 +67,12 @@ export async function handle(req: Request, env: Env): Promise<Response> {
     if (!v) return json({ error: 'not found' }, 404);
     if (v.status !== 'failed') return json({ error: 'only a failed call can be retried' }, 409);
     await markProcessing(env.DB, v.id);
-    await env.PROCESS_CALL.create({ id: `${v.id}-retry-${Date.now()}`, params: { callId: v.id } });
+    try {
+      await env.PROCESS_CALL.create({ id: `${v.id}-retry-${Date.now()}`, params: { callId: v.id } });
+    } catch {
+      await markFailed(env.DB, v.id, 'could not start processing');
+      return json({ error: 'Could not start processing.' }, 503);
+    }
     return json({ id: v.id }, 202);
   }
 

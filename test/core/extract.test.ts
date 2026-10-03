@@ -271,8 +271,9 @@ test('the prompt the Worker will use renders with promptVars (no missing placeho
   const { renderPrompt } = await import('../../src/core/extract.ts');
   const { promptVars } = await import('../../src/core/config.ts');
   const { readFileSync, existsSync } = await import('node:fs');
-  const dir = existsSync('private/prompts/call.md') ? 'private/prompts' : 'prompts';
-  const file = existsSync(`${dir}/call.md`) ? `${dir}/call.md` : `${dir}/call.example.md`;
-  const crit = existsSync(`${dir}/script-criteria.md`) ? readFileSync(`${dir}/script-criteria.md`, 'utf8') : '';
+  // Same per-file choice as vite.config.ts: private if present, else the public example.
+  const pick = (name: string, example: string) => (existsSync(`private/prompts/${name}`) ? `private/prompts/${name}` : `prompts/${example}`);
+  const file = pick('call.md', 'call.example.md');
+  const crit = readFileSync(pick('script-criteria.md', 'script-criteria.example.md'), 'utf8');
   assert.doesNotThrow(() => renderPrompt(readFileSync(file, 'utf8'), promptVars('2026-10-01', crit)));
 });

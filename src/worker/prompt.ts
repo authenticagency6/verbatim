@@ -1,10 +1,9 @@
-// '@prompts' resolves to private/prompts when present, else the public example (vite.config.ts).
-import callMd from '@prompts/call.md?raw';
+// '@prompt-call' / '@prompt-criteria' resolve to private/prompts when present, else the public
+// examples in prompts/ (see vite.config.ts), so a fresh public clone still builds.
+import callMd from '@prompt-call?raw';
+import scriptCriteria from '@prompt-criteria?raw';
 import { renderPrompt } from '../core/extract.ts';
 import { promptVars } from '../core/config.ts';
-
-const criteria = import.meta.glob('@prompts/script-criteria.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const scriptCriteria = Object.values(criteria)[0] ?? '';
 
 export function systemPrompt(callDate: string): string {
   return renderPrompt(callMd, promptVars(callDate, scriptCriteria));

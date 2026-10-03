@@ -11,7 +11,11 @@ declare namespace Cloudflare {
     mainModule: typeof import('./index.ts');
   }
 }
-declare module '*.md?raw' {
+declare module '@prompt-call?raw' {
+  const text: string;
+  export default text;
+}
+declare module '@prompt-criteria?raw' {
   const text: string;
   export default text;
 }

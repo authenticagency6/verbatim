@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin';
-import { promptsDir } from './vite.config.ts';
+import { promptAliases } from './vite.config.ts';
 
 export default defineConfig({
   plugins: [
@@ -15,6 +15,6 @@ export default defineConfig({
       },
     })),
   ],
-  resolve: { alias: { '@prompts': promptsDir } },
+  resolve: { alias: promptAliases },
   test: { include: ['test/worker/**/*.test.ts'], setupFiles: ['./test/worker/apply-migrations.ts'] },
 });

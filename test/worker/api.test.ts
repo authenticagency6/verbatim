@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { env, exports } from 'cloudflare:workers';
 import { introspectWorkflow } from 'cloudflare:test';
-import { insertCall, saveResults, getCallView } from '../../src/worker/db.ts';
+import { insertCall, saveResults, getCallView, markFailed } from '../../src/worker/db.ts';
 
 const BASE = 'https://verbatim.test';
 const LONG = 'Renata: we can get you approved up to four hundred thousand on this one and the payment would be about thirty two hundred a month all in with taxes.';
@@ -93,5 +93,29 @@ describe('GET /api/calls/:id and decisions', () => {
   it('retry is 409 unless the call failed', async () => {
     await seeded('g5');
     expect((await post('/api/calls/g5/retry')).status).toBe(409);
+  });
+});
+
+describe('when the workflow cannot be started', () => {
+  it('POST /api/calls marks the call failed and returns 503', async () => {
+    const spy = vi.spyOn(env.PROCESS_CALL, 'create').mockRejectedValue(new Error('no workflow'));
+    try {
+      const res = await post('/api/calls', { transcript: LONG, callDate: '2026-10-01' });
+      expect(res.status).toBe(503);
+      const { id } = await res.json<{ id: string }>();
+      const view = (await getCallView(env.DB, id))!;
+      expect(view.status).toBe('failed');
+      expect(view.error).toBe('could not start processing');
+    } finally { spy.mockRestore(); }
+  });
+
+  it('retry marks the call failed again and returns 503, so it can be retried later', async () => {
+    await insertCall(env.DB, { id: 'r1', callDate: '2026-10-01', redactedTranscript: LONG });
+    await markFailed(env.DB, 'r1', 'boom');
+    const spy = vi.spyOn(env.PROCESS_CALL, 'create').mockRejectedValue(new Error('no workflow'));
+    try {
+      expect((await post('/api/calls/r1/retry')).status).toBe(503);
+      expect((await getCallView(env.DB, 'r1'))!.status).toBe('failed');
+    } finally { spy.mockRestore(); }
   });
 });
