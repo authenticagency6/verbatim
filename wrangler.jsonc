@@ -1,0 +1,12 @@
+{
+  "name": "verbatim",
+  "main": "./src/worker/index.ts",
+  "compatibility_date": "2026-09-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "verbatim", "database_id": "REPLACE_AFTER_wrangler_d1_create", "migrations_dir": "migrations" }
+  ],
+  "workflows": [{ "name": "process-call", "binding": "PROCESS_CALL", "class_name": "ProcessCall" }],
+  "observability": { "enabled": true }
+}

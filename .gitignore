@@ -2,9 +2,8 @@
 node_modules/
 dist/
 .wrangler/
-.dev.vars
-.env
-.env.*
+.dev.vars*
+.env*
 
 # local Claude Code settings
 .claude/settings.local.json
