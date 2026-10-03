@@ -89,3 +89,34 @@ test('nothing discussed gives nothing', () => {
   const s = run({ guardrails: { approved_price: null }, follow_up_date: null });
   assert.deepEqual(s, { proposals: [], dropped: [], unlocated: [] });
 });
+
+test('too-short task evidence is dropped with the validator reason', () => {
+  const s = run({
+    qualification: [{ field: 'next_action', value: 'deliverable | Marcus | - | Send the fee sheet', evidence: 'fee sheet' }],
+  });
+  assert.equal(s.proposals.length, 0);
+  const rows = s.dropped.filter((d) => d.field === 'next_action');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].reason, 'evidence_too_short');
+  assertNoOverlap(s);
+});
+
+test('a bad due date drops only the date; the task card stays', () => {
+  const s = run({
+    qualification: [{ field: 'next_action', value: 'deliverable | Marcus | 2026-09-01 | Send the fee sheet', evidence: 'I will call you back on Thursday and Marcus will send the fee sheet over today' }],
+  });
+  const tasks = s.proposals.filter((p) => p.kind === 'task');
+  assert.equal(tasks.length, 1);
+  assert.doesNotMatch(tasks[0].label, /due/);
+  assert.deepEqual(s.dropped, [{ field: 'next_action_due', value: '2026-09-01', reason: 'date_before_call' }]);
+  assertNoOverlap(s);
+});
+
+test('a rate range that fails one bound drops with the full model value', () => {
+  const s = run({ guardrails: { rate_range_quoted: { value: '6.5-8', evidence: QUOTE_PAY } } });
+  assert.equal(s.proposals.length, 0);
+  const rows = s.dropped.filter((d) => d.field === 'rate_range_quoted');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].value, '6.5-8');
+  assert.equal(rows[0].reason, 'not_grounded_in_transcript');
+});

@@ -44,6 +44,8 @@ const TASK_LABELS: Record<string, string> = {
   third_party: 'Waiting on a third party',
 };
 
+const DUE_DATE_REASONS = new Set<string>(['not_a_valid_date', 'date_before_call', 'date_in_future', 'date_implausibly_far']);
+
 const REVIEWED_FIELDS = new Set([...Object.keys(FIGURE_LABELS), 'follow_up_date', 'next_action']);
 
 export function buildProposals(v: WritebackValidationResult, redactedTranscript: string): ProposalSet {
@@ -74,19 +76,25 @@ export function buildProposals(v: WritebackValidationResult, redactedTranscript:
 
   const na = v.next_action;
   if (na) {
-    if (!na.evidenceVerified) {
-      dropped.push({ field: 'next_action', value: na.action, reason: 'evidence_not_in_transcript' });
-    } else {
+    if (na.evidenceVerified) {
       const base = TASK_LABELS[na.kind] ?? 'Task';
       propose('task', 'next_action', na.due ? `${base} · due ${na.due}` : base, na.action, na.evidence);
     }
   }
 
+  // The validator's failures give the real drop reasons. A next_action failure is either about
+  // its due date (the task survives with the due nulled) or about its quote or kind.
   for (const f of v.failures as ValidationFailure[]) {
     if (!REVIEWED_FIELDS.has(f.field)) continue;
-    const value = String(f.bound ?? f.value);
-    if (dropped.some((d) => d.field === f.field && d.value === value)) continue;
-    dropped.push({ field: f.field, value, reason: f.reason });
+    const field = f.field === 'next_action' && DUE_DATE_REASONS.has(f.reason) ? 'next_action_due' : f.field;
+    const value = String(f.value);
+    if (dropped.some((d) => d.field === field && d.value === value)) continue;
+    dropped.push({ field, value, reason: f.reason });
+  }
+
+  // An unverified task must always show up as dropped, even if the validator logged nothing for it.
+  if (na && !na.evidenceVerified && !dropped.some((d) => d.field === 'next_action')) {
+    dropped.push({ field: 'next_action', value: na.action, reason: 'evidence_not_in_transcript' });
   }
 
   return { proposals, dropped, unlocated };
