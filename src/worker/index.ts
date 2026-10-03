@@ -1,4 +1,5 @@
 import { handle } from './routes.ts';
+export { ProcessCall } from './workflow.ts';
 
 export default {
   fetch(req: Request, env: Env): Promise<Response> {

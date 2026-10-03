@@ -261,3 +261,18 @@ test('extract() uses the injected fetch and never puts the key in the body', asy
   assert.equal((seen!.init.headers as Record<string, string>)['x-api-key'], 'k-123');
   assert.ok(!String(seen!.init.body).includes('k-123'));
 });
+
+test('renderPrompt throws and names a placeholder missing from vars', async () => {
+  const { renderPrompt } = await import('../../src/core/extract.ts');
+  assert.throws(() => renderPrompt('Hi {{contact_name}}', {}), /contact_name/);
+});
+
+test('the prompt the Worker will use renders with promptVars (no missing placeholder)', async () => {
+  const { renderPrompt } = await import('../../src/core/extract.ts');
+  const { promptVars } = await import('../../src/core/config.ts');
+  const { readFileSync, existsSync } = await import('node:fs');
+  const dir = existsSync('private/prompts/call.md') ? 'private/prompts' : 'prompts';
+  const file = existsSync(`${dir}/call.md`) ? `${dir}/call.md` : `${dir}/call.example.md`;
+  const crit = existsSync(`${dir}/script-criteria.md`) ? readFileSync(`${dir}/script-criteria.md`, 'utf8') : '';
+  assert.doesNotThrow(() => renderPrompt(readFileSync(file, 'utf8'), promptVars('2026-10-01', crit)));
+});
