@@ -23,7 +23,7 @@ reliably, keeps each organisation's data apart, and is cheap at low volume.
 | Model | Anthropic API behind one `extract()` (structured output, explicit effort); API key as a Worker secret |
 | Email | Cloudflare Email Service (later slices) |
 | Phone capture | A connector interface; Quo is the first connector (later slices) |
-| Core | `packages/core`: import-free TypeScript, tested with `node --test`, no knowledge of storage or transport |
+| Core | `src/core/`: import-free TypeScript, tested with `node --test`, no knowledge of storage or transport |
 
 ## Consequences
 

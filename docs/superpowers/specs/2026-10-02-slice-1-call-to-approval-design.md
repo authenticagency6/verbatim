@@ -92,7 +92,7 @@ packages/core/            import-free TypeScript, node --test
   proposals.ts            NEW: validated extraction → { proposals, dropped }
 apps/worker/              Worker: routes, ProcessCall Workflow, D1 access
 apps/web/                 React SPA on Workers static assets
-private/                  full prompts, script criteria, regression calls (gitignored)
+private/                  full prompts, script criteria, regression corpus, edge-case catalogue (gitignored)
 ```
 
 `core` knows nothing about storage, HTTP or Cloudflare. `extract` takes `fetch` as an argument.
@@ -115,8 +115,10 @@ private/                  full prompts, script criteria, regression calls (gitig
   tray is exercised.
 - **Private regression set:** the existing fabricated calls, people renamed into Tallbrook, kept
   in `private/` with their expected extractions.
-- Every ported file is grepped for real names, IDs and team lines before it leaves `private/`;
-  prompts and validator internals stay private.
+- Every ported file is grepped for real names, IDs and team lines before it is committed.
+- **Public:** the core code, including validator and redaction (comments scrubbed of names and
+  incident history), and the ported unit tests. **Private:** full prompts, the regression and trap
+  corpus, and the edge-case catalogue. (Decided by Dan 2026-10-02 while planning.)
 
 ## Testing
 
