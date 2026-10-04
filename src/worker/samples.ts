@@ -1,3 +1,6 @@
-// Filled with real samples in Task 9; an empty list keeps the route valid.
+import s1 from '../../samples/tallbrook-01-preapproval.json';
+import s2 from '../../samples/tallbrook-02-results-es.json';
+import s3 from '../../samples/tallbrook-03-bait.json';
+
 export interface Sample { id: string; title: string; callDate: string; transcript: string }
-export const SAMPLES: Sample[] = [];
+export const SAMPLES: Sample[] = [s1, s2, s3];
