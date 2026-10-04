@@ -2,19 +2,19 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Proposal } from '../api.ts';
 import { segments } from '../segments.ts';
 
-export function TranscriptPane({ transcript, proposals, focus, onPick }: {
-  transcript: string; proposals: Proposal[]; focus: string | null; onPick: (id: string) => void;
+export function TranscriptPane({ transcript, proposals, focus, nonce, onPick }: {
+  transcript: string; proposals: Proposal[]; focus: string | null; nonce: number; onPick: (id: string) => void;
 }) {
   const segs = useMemo(() => segments(transcript, proposals), [transcript, proposals]);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!focus) return;
-    const el = ref.current?.querySelector(`[data-ids~="${focus}"]`);
+    const el = ref.current?.querySelector(`[data-ids~="${CSS.escape(focus)}"]`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.remove('pulse'); void (el as HTMLElement).offsetWidth; el.classList.add('pulse');
     }
-  }, [focus]);
+  }, [focus, nonce]);
   return (
     <section className="transcript" ref={ref}>
       <h2>Transcript</h2>

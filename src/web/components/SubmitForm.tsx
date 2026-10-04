@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { api, type Sample } from '../api.ts';
+import { localDateString } from '../localDate.ts';
 
 export function SubmitForm({ onSubmitted }: { onSubmitted: (id: string) => void }) {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [transcript, setTranscript] = useState('');
-  const [callDate, setCallDate] = useState(new Date().toISOString().slice(0, 10));
+  const [callDate, setCallDate] = useState(localDateString());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => { api.samples().then(setSamples).catch(() => setSamples([])); }, []);
